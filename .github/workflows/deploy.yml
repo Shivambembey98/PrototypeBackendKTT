@@ -1,0 +1,58 @@
+name: Deploy KTT app on EC2
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: SSH into EC2 and deploy Angular app
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          script: |
+            # Switch to root user (correct way)
+            sudo -i <<EOF
+            
+            # Update and upgrade system packages
+            apt update && apt upgrade -y
+            
+            # Install dependencies
+            apt install docker.io -y
+            
+            # Enabling docker
+            systemctl start docker
+            systemctl enable docker
+            
+            # Ensure Git is set up properly
+            git config --global --add safe.directory /home/${{ secrets.EC2_USER }}/KTT-backend
+            
+            # Clone or pull the repository
+            if [ -d "KTT-backend" ]; then
+              cd KTT-backend
+              git pull origin main
+            else
+              git clone https://${{ secrets.PAT_GITHUB }}@github.com/KwikTravelTrip/KTT-backend.git
+              cd KTT-backend
+            fi
+            
+            # building docker images auth-service and booking-service
+            cd auth-main
+            docker build -t auth-service .
+            cd ..
+            cd booking
+            docker build -t booking-service .
+            cd ..
+            
+            
+            # Building docker compose file
+            apt install docker-compose -y
+            docker-compose up --build -d
+
