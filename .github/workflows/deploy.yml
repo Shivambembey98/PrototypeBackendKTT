@@ -55,4 +55,3 @@ jobs:
             # Building docker compose file
             apt install docker-compose -y
             docker-compose up --build -d
-
