@@ -32,15 +32,15 @@ jobs:
             systemctl enable docker
             
             # Ensure Git is set up properly
-            git config --global --add safe.directory /home/${{ secrets.EC2_USER }}/KTT-backend
+            git config --global --add safe.directory /home/${{ secrets.EC2_USER }}/PrototypeBackendKTT
             
             # Clone or pull the repository
             if [ -d "KTT-backend" ]; then
               cd KTT-backend
               git pull origin main
             else
-              git clone https://${{ secrets.PAT_GITHUB }}@github.com/KwikTravelTrip/KTT-backend.git
-              cd KTT-backend
+              git clone https://${{ secrets.PAT_GITHUB }}@github.com/Shivambembey98/PrototypeBackendKTT.git
+              cd PrototypeBackendKTT
             fi
             
             # building docker images auth-service and booking-service
